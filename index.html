@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AutoSegura | Seguridad vehicular</title>
+<style>
+:root{--bg:#0b1220;--panel:#152238;--line:#293a54;--text:#eef4ff;--muted:#9aabc4;--blue:#4ea1ff;--green:#35d39a;--red:#ff4d5e}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#15294a,var(--bg) 45%);color:var(--text);font:16px/1.5 "Segoe UI",Arial,sans-serif}.wrap{max-width:1120px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:22px}.brand{display:flex;align-items:center;gap:13px}.logo{background:#2878ed;border-radius:15px;padding:12px;font-size:25px}h1{margin:0;font-size:2rem}h2{font-size:1.08rem;margin:0 0 16px}.sub,.hint,.time,footer{color:var(--muted)}.tag{border:1px solid #345477;border-radius:99px;padding:7px 12px;color:#a9d5ff;background:#132844;font-size:.8rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:linear-gradient(180deg,#152238,#121d30);border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0}.wide{grid-column:1/-1}.status{display:flex;align-items:center;gap:14px;margin:18px 0}.icon{font-size:30px;background:#1c3654;padding:12px;border-radius:15px}.value{font-size:1.35rem;font-weight:800}.green{color:var(--green)}.blue{color:var(--blue)}.red{color:var(--red)}input[type=password]{width:150px;background:#0b1424;color:white;border:1px solid #344862;border-radius:10px;padding:12px;letter-spacing:4px;text-align:center}.btn{border:0;border-radius:10px;padding:12px 15px;font-weight:700;cursor:pointer;margin:3px}.primary{background:var(--blue);color:#06172c}.success{background:var(--green);color:#06271c}.danger{background:var(--red);color:#30060b}.muted{background:#273950;color:white;border:1px solid #3a506b}.sensors,.checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sensor,.check{background:#101b2c;border:1px solid #2d405a;border-radius:13px;padding:14px;color:var(--text);text-align:left}.sensor{cursor:pointer;min-height:95px}.sensor:hover{border-color:var(--blue)}.sensor span{display:block;font-size:23px}.sensor small{color:var(--muted)}.check{display:flex;gap:10px;align-items:center}.check input{accent-color:var(--green);width:18px;height:18px}.bar{height:9px;background:#26364d;border-radius:99px;overflow:hidden}.fill{height:100%;width:0;background:var(--green);transition:width .2s}.progress{display:flex;justify-content:space-between;margin:15px 0 8px}.events{list-style:none;padding:0;margin:12px 0}.event{padding:12px 0;border-bottom:1px solid #26364d;overflow-wrap:anywhere}.time{font-size:.8rem}.empty{text-align:center;color:var(--muted);padding:18px}.alert{display:none;padding:15px;background:#9d172a;border:1px solid var(--red);border-radius:12px;margin-bottom:16px;font-weight:bold}.alert.show{display:flex;justify-content:space-between;align-items:center;gap:10px}.flash{animation:flash .8s infinite}@keyframes flash{50%{background:#ed233b}}#msg{min-height:24px;color:#ffc857;font-size:.9rem}footer{text-align:center;padding:22px;font-size:.8rem}@media(max-width:740px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.wrap{padding:14px}}@media(max-width:420px){.sensors,.checks{grid-template-columns:1fr}.card{padding:16px}}
+</style></head>
+<body><main class="wrap">
+<header><div class="brand"><div class="logo">🛡️</div><div><h1>AutoSegura</h1><div class="sub">Panel de control de seguridad vehicular</div></div></div><span class="tag">PROTOTIPO UNIVERSITARIO · UIDE</span></header>
+<div id="alert" class="alert" role="alert"><div>⚠️ ALARMA ACTIVADA<br><small id="alertText">Actividad sospechosa detectada</small></div><button class="btn muted" id="silence">Silenciar</button></div>
+<div class="grid">
+<section class="card"><h2>Estado del sistema</h2><div class="status"><div class="icon" id="icon">🔓</div><div><div class="sub">Protección del vehículo</div><div class="value blue" id="state">DESARMADO</div></div></div><input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN de 4 dígitos" aria-label="PIN de cuatro dígitos"><button id="toggle" class="btn success">Armar sistema</button><p class="hint">PIN inicial: <b>1234</b>. Es un PIN de demostración, no uses uno real.</p><div id="msg" role="status"></div></section>
+<section class="card"><h2>Simulador de sensores</h2><div class="sensors">
+<button class="sensor" data-sensor="Puerta abierta"><span>🚪</span><b>Puerta abierta</b><br><small>Simular apertura</small></button>
+<button class="sensor" data-sensor="Golpe o vibración"><span>💥</span><b>Golpe o vibración</b><br><small>Simular impacto</small></button>
+<button class="sensor" data-sensor="Encendido sin llave"><span>🔑</span><b>Encendido sin llave</b><br><small>Intento de arranque</small></button>
+<button class="sensor" data-sensor="Batería desconectada"><span>🔋</span><b>Batería desconectada</b><br><small>Simular desconexión</small></button>
+</div><p class="hint">Los botones simulan eventos. La alarma se activa cuando el sistema está armado.</p></section>
+<section class="card wide"><h2>Checklist de seguridad antes de salir</h2><div class="checks">
+<label class="check"><input type="checkbox" data-check="ventanas"> Ventanas cerradas</label>
+<label class="check"><input type="checkbox" data-check="puertas"> Puertas con seguro</label>
+<label class="check"><input type="checkbox" data-check="objetos"> Objetos de valor ocultos</label>
+<label class="check"><input type="checkbox" data-check="freno"> Freno de mano activado</label></div><div class="progress"><span>Revisión completada</span><b class="green" id="progress">0 de 4 (0%)</b></div><div class="bar"><div id="fill" class="fill"></div></div></section>
+<section class="card wide"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h2 style="margin:0">Historial de eventos</h2><button id="clear" class="btn muted">Borrar historial</button></div><ul class="events" id="events"></ul><div id="empty" class="empty">Todavía no hay eventos registrados.</div></section>
+</div><footer>AutoSegura · Proyecto académico UIDE<br>Simulación educativa: no detecta robos reales ni sustituye una alarma instalada.</footer>
+</main>
+<script>
+"use strict";
+// Configuración y claves de almacenamiento persistente en el navegador.
+const PIN_CORRECTO="1234",KEYS={armed:"autosegura_armed",checks:"autosegura_checklist",events:"autosegura_events"};
+const $=s=>document.querySelector(s);
+function read(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}}
+let armed=localStorage.getItem(KEYS.armed)==="true",alarm=false,silenced=false,timer=null,ctx=null;
+let events=read(KEYS.events,[]),checks=read(KEYS.checks,{ventanas:false,puertas:false,objetos:false,freno:false});
+function save(){localStorage.setItem(KEYS.armed,String(armed));localStorage.setItem(KEYS.checks,JSON.stringify(checks));localStorage.setItem(KEYS.events,JSON.stringify(events))}
+function log(title,danger=false){events.unshift({title,danger,at:new Date().toISOString()});events=events.slice(0,100);save();renderEvents()}
+function renderEvents(){$("#events").replaceChildren();$("#empty").style.display=events.length?"none":"block";events.forEach(e=>{let li=document.createElement("li");li.className="event";let t=document.createElement("div");t.textContent=(e.danger?"🔴 ":"🔹 ")+e.title;let time=document.createElement("div");time.className="time";time.textContent=new Date(e.at).toLocaleString("es-EC");li.append(t,time);$("#events").append(li)})}
+function status(){$("#state").textContent=alarm?"ALARMA ACTIVADA":armed?"ARMADO":"DESARMADO";$("#state").className="value "+(alarm?"red":armed?"green":"blue");$("#icon").textContent=alarm?"🚨":armed?"🔒":"🔓";$("#toggle").textContent=armed?"Desarmar sistema":"Armar sistema";$("#toggle").className="btn "+(armed?"danger":"success")}
+function msg(t,error=false){$("#msg").textContent=t;$("#msg").style.color=error?"var(--red)":"#ffc857"}
+function stopAlarm(){alarm=false;silenced=false;$("#alert").classList.remove("show","flash");if(timer)clearInterval(timer);timer=null;status()}
+function tone(){try{let A=window.AudioContext||window.webkitAudioContext;if(!A||silenced)return;if(!ctx)ctx=new A();if(ctx.state==="suspended")ctx.resume();let o=ctx.createOscillator(),g=ctx.createGain();o.type="sawtooth";o.frequency.value=880;g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.1,ctx.currentTime+.03);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.28);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.3)}catch(e){console.warn("Audio no disponible",e)}}
+function trigger(sensor){alarm=true;silenced=false;$("#alertText").textContent="Evento detectado: "+sensor;$("#alert").classList.add("show","flash");status();msg("Actividad sospechosa detectada.",true);if(timer)clearInterval(timer);tone();timer=setInterval(tone,650)}
+$("#toggle").addEventListener("click",()=>{if(!/^\d{4}$/.test($("#pin").value)){msg("Introduce un PIN de exactamente 4 dígitos.",true);return}if($("#pin").value!==PIN_CORRECTO){msg("PIN incorrecto. Inténtalo de nuevo.",true);log("Intento de acceso con PIN incorrecto",true);return}$("#pin").value="";if(armed){armed=false;stopAlarm();log("Sistema desarmado mediante PIN");msg("Sistema desarmado correctamente.")}else{armed=true;log("Sistema armado");msg("Sistema armado. Sensores en vigilancia simulada.")}save();status()});
+$("#pin").addEventListener("keydown",e=>{if(e.key==="Enter")$("#toggle").click()});
+document.querySelectorAll("[data-sensor]").forEach(b=>b.addEventListener("click",()=>{let s=b.dataset.sensor;if(armed){log("ALERTA: "+s,true);trigger(s)}else{log("Sensor simulado con sistema desarmado: "+s);msg("Evento registrado; el sistema está desarmado.")}}));
+$("#silence").addEventListener("click",()=>{silenced=true;if(timer)clearInterval(timer);timer=null;$("#alert").classList.remove("flash");msg("Sonido silenciado; la alerta visual sigue activa.");log("Sonido de alarma silenciado")});
+function renderChecks(){let inputs=[...document.querySelectorAll("[data-check]")],n=0;inputs.forEach(i=>{i.checked=!!checks[i.dataset.check];if(i.checked)n++});let p=Math.round(n/inputs.length*100);$("#progress").textContent=n+" de "+inputs.length+" ("+p+"%)";$("#fill").style.width=p+"%"}
+document.querySelectorAll("[data-check]").forEach(i=>i.addEventListener("change",()=>{checks[i.dataset.check]=i.checked;save();renderChecks()}));
+$("#clear").addEventListener("click",()=>{if(confirm("¿Seguro que deseas borrar todo el historial?")){events=[];save();renderEvents();msg("Historial borrado.")}});
+// Restaura el estado guardado al cargar la página.
+renderEvents();renderChecks();status();if(armed)msg("Estado recuperado: sistema armado.");
+</script></body></html>
