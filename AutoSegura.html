@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoSegura | Panel de seguridad vehicular</title>
+  <style>
+    /* ===== Estilos generales ===== */
+    :root {
+      --bg: #0b1220;
+      --panel: #121d30;
+      --panel-2: #17243a;
+      --line: #293a54;
+      --text: #eef4ff;
+      --muted: #9aabc4;
+      --blue: #4ea1ff;
+      --green: #35d39a;
+      --red: #ff4d5e;
+      --yellow: #ffc857;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at top right, #15294a 0, var(--bg) 42%);
+      color: var(--text); min-height: 100vh;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .container { max-width: 1200px; margin: auto; padding: 24px; }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .logo {
+      width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center;
+      background: linear-gradient(135deg, #4ea1ff, #2b67e8); font-size: 25px;
+      box-shadow: 0 8px 25px #2563eb40;
+    }
+    h1 { margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.5px; }
+    .subtitle { margin: 5px 0 0; color: var(--muted); font-size: .92rem; }
+    .tag {
+      border: 1px solid #345477; background: #132844; color: #a9d5ff;
+      padding: 8px 12px; border-radius: 999px; font-size: .8rem; white-space: nowrap;
+    }
+    .grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 18px; }
+    .card {
+      background: linear-gradient(180deg, #152238, var(--panel));
+      border: 1px solid var(--line); border-radius: 20px; padding: 22px;
+      box-shadow: 0 12px 35px #00000018; min-width: 0;
+    }
+    .card h2 { font-size: 1.08rem; margin: 0 0 17px; }
+    .wide { grid-column: 1 / -1; }
+    .status-card { position: relative; overflow: hidden; }
+    .status-card::after {
+      content: ""; position: absolute; width: 180px; height: 180px; border-radius: 50%;
+      background: #4ea1ff0b; right: -55px; top: -75px; pointer-events: none;
+    }
+    .status-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .status-icon {
+      width: 54px; height: 54px; display: grid; place-items: center; border-radius: 17px;
+      background: #1c3654; font-size: 27px; flex-shrink: 0;
+    }
+    .status-label { color: var(--muted); font-size: .88rem; margin-bottom: 5px; }
+    .status-value { font-size: 1.35rem; font-weight: 750; }
+    .status-value.armed { color: var(--green); }
+    .status-value.disarmed { color: var(--blue); }
+    .status-value.alarm { color: var(--red); }
+    .pin-area { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pin-area input {
+      min-width: 120px; width: 150px; background: #0b1424; color: var(--text);
+      border: 1px solid #344862; border-radius: 11px; padding: 12px;
+      letter-spacing: 5px; text-align: center; outline: none;
+    }
+    .pin-area input:focus { border-color: var(--blue); }
+    .btn {
+      border: 0; border-radius: 11px; padding: 12px 15px; font-weight: 700;
+      transition: transform .15s, filter .15s; color: #06111e;
+    }
+    .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-primary { background: var(--blue); color: #06172c; }
+    .btn-green { background: var(--green); color: #06271c; }
+    .btn-red { background: var(--red); color: #30060b; }
+    .btn-muted { background: #273950; color: var(--text); border: 1px solid #3a506b; }
+    .hint { color: var(--muted); font-size: .8rem; line-height: 1.5; margin: 12px 0 0; }
+    .sensor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+    .sensor {
+      text-align: left; padding: 15px; border: 1px solid #2d405a; border-radius: 14px;
+      background: #101b2c; color: var(--text); min-height: 105px;
+    }
+    .sensor:hover { border-color: var(--blue); background: #14243a; }
+    .sensor:disabled { opacity: .45; cursor: not-allowed; }
+    .sensor .emoji { font-size: 22px; display: block; margin-bottom: 9px; }
+    .sensor strong { display: block; font-size: .9rem; }
+    .sensor small { display: block; color: var(--muted); margin-top: 5px; }
+    .alert-banner {
+      display: none; padding: 14px 16px; border-radius: 13px; margin-bottom: 16px;
+      border: 1px solid #ff4d5e; background: #5b1522; color: #fff;
+      font-weight: 800; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .alert-banner.show { display: flex; }
+    .alert-banner span { font-size: .86rem; font-weight: 500; }
+    .alert-banner.flashing { animation: flash 0.85s infinite; }
+    @keyframes flash { 0%, 100% { background: #651522; } 50% { background: #ed233b; } }
+    .checklist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .check-item {
+      display: flex; align-items: center; gap: 11px; background: #101b2c;
+      border: 1px solid #2b3d55; border-radius: 13px; padding: 14px; cursor: pointer;
+    }
+    .check-item input { accent-color: var(--green); width: 18px; height: 18px; }
+    .check-item span { font-size: .92rem; }
+    .progress-head { display: flex; justify-content: space-between; gap: 10px; margin: 17px 0 8px; font-size: .86rem; }
+    .progress-head strong { color: var(--green); }
+    .progress-track { background: #26364d; border-radius: 999px; height: 9px; overflow: hidden; }
+    .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #35d39a, #7ce7b9); transition: width .25s; }
+    .events-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .events-list { list-style: none; margin: 0; padding: 0; }
+    .event {
+      display: flex; gap: 12px; align-items: flex-start; padding: 13px 0;
+      border-bottom: 1px solid #26364d;
+    }
+    .event:last-child { border-bottom: 0; }
+    .event-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: var(--blue); }
+    .event-dot.danger { background: var(--red); box-shadow: 0 0 10px #ff4d5e75; }
+    .event-main { flex: 1; min-width: 0; }
+    .event-title { font-size: .9rem; font-weight: 700; overflow-wrap: anywhere; }
+    .event-time { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+    .empty { color: var(--muted); text-align: center; padding: 25px 8px; font-size: .9rem; }
+    .toast { color: var(--yellow); font-size: .86rem; min-height: 20px; margin-top: 10px; }
+    footer { text-align: center; color: #8193ad; font-size: .78rem; padding: 22px 0 4px; line-height: 1.6; }
+    @media (max-width: 780px) {
+      .container { padding: 15px; }
+      .grid { grid-template-columns: 1fr; }
+      .wide { grid-column: auto; }
+    }
+    @media (max-width: 430px) {
+      .sensor-grid, .checklist { grid-template-columns: 1fr; }
+      .card { padding: 17px; }
+      .pin-area input { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🛡️</div>
+        <div>
+          <h1>AutoSegura</h1>
+          <p class="subtitle">Panel de control de seguridad vehicular</p>
+        </div>
+      </div>
+      <div class="tag">PROTOTIPO UNIVERSITARIO · UIDE</div>
+    </header>
+
+    <div id="alertBanner" class="alert-banner" role="alert" aria-live="assertive">
+      <div>⚠️ ALARMA ACTIVADA<br><span id="alertText">Se detectó una actividad sospechosa.</span></div>
+      <button id="silenceBtn" class="btn btn-muted" type="button">Silenciar</button>
+    </div>
+
+    <section class="grid">
+      <article class="card status-card">
+        <h2>Estado del sistema</h2>
+        <div class="status-row">
+          <div class="status-icon" id="statusIcon">🔓</div>
+          <div>
+            <div class="status-label">Protección del vehículo</div>
+            <div class="status-value disarmed" id="statusValue">DESARMADO</div>
+          </div>
+        </div>
+        <div class="pin-area">
+          <input id="pinInput" type="password" inputmode="numeric" maxlength="4"
+                 placeholder="PIN de 4 dígitos" aria-label="PIN de cuatro dígitos" autocomplete="off">
+          <button id="toggleBtn" class="btn btn-green" type="button">Armar sistema</button>
+        </div>
+        <p class="hint">PIN inicial del prototipo: <strong>1234</strong>. Introduce el PIN para armar o desarmar. No uses un PIN real.</p>
+        <div class="toast" id="message" role="status" aria-live="polite"></div>
+      </article>
+
+      <article class="card">
+        <h2>Simulador de sensores</h2>
+        <div class="sensor-grid">
+          <button class="sensor" data-sensor="Puerta abierta" data-icon="🚪" type="button">
+            <span class="emoji">🚪</span><strong>Puerta abierta</strong><small>Simular apertura</small>
+          </button>
+          <button class="sensor" data-sensor="Golpe o vibración" data-icon="💥" type="button">
+            <span class="emoji">💥</span><strong>Golpe o vibración</strong><small>Simular impacto</small>
+          </button>
+          <button class="sensor" data-sensor="Encendido sin llave" data-icon="🔑" type="button">
+            <span class="emoji">🔑</span><strong>Encendido sin llave</strong><small>Simular intento de arranque</small>
+          </button>
+          <button class="sensor" data-sensor="Batería desconectada" data-icon="🔋" type="button">
+            <span class="emoji">🔋</span><strong>Batería desconectada</strong><small>Simular desconexión</small>
+          </button>
+        </div>
+        <p class="hint">Los botones representan eventos simulados. La alarma se dispara únicamente si el sistema está armado.</p>
+      </article>
+
+      <article class="card wide">
+        <h2>Checklist de seguridad antes de salir</h2>
+        <div class="checklist">
+          <label class="check-item"><input type="checkbox" data-check="ventanas"><span>Ventanas cerradas</span></label>
+          <label class="check-item"><input type="checkbox" data-check="puertas"><span>Puertas con seguro</span></label>
+          <label class="check-item"><input type="checkbox" data-check="objetos"><span>Objetos de valor ocultos</span></label>
+          <label class="check-item"><input type="checkbox" data-check="freno"><span>Freno de mano activado</span></label>
+        </div>
+        <div class="progress-head"><span>Revisión completada</span><strong id="progressLabel">0 de 4 (0%)</strong></div>
+        <div class="progress-track" role="progressbar" aria-label="Progreso del checklist" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </article>
+
+      <article class="card wide">
+        <div class="events-top">
+          <h2 style="margin-bottom:0">Historial de eventos</h2>
+          <button id="clearBtn" class="btn btn-muted" type="button">Borrar historial</button>
+        </div>
+        <ul class="events-list" id="eventsList" aria-live="polite"></ul>
+        <div class="empty" id="emptyEvents">Todavía no hay eventos registrados.</div>
+      </article>
+    </section>
+
+    <footer>
+      AutoSegura · Proyecto académico de la UIDE<br>
+      Simulación de interfaz: no sustituye una alarma antirrobo instalada ni un sistema de seguridad certificado.
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    // ===== Configuración y almacenamiento local =====
+    const DEFAULT_PIN = "1234"; // PIN de demostración; no es una medida de seguridad real.
+    const STORAGE_KEYS = {
+      armed: "autosegura_armed",
+      checklist: "autosegura_checklist",
+      events: "autosegura_events"
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const pinInput = $("#pinInput");
+    const toggleBtn = $("#toggleBtn");
+    const statusValue = $("#statusValue");
+    const statusIcon = $("#statusIcon");
+    const message = $("#message");
+    const alertBanner = $("#alertBanner");
+    const alertText = $("#alertText");
+    const eventsList = $("#eventsList");
+    const emptyEvents = $("#emptyEvents");
+
+    // Recupera datos guardados y usa valores predeterminados si no existen.
+    let isArmed = localStorage.getItem(STORAGE_KEYS.armed) === "true";
+    let alarmActive = false;
+    let alarmSilenced = false;
+    let events = loadJSON(STORAGE_KEYS.events, []);
+    let checklistState = loadJSON(STORAGE_KEYS.checklist, {
+      ventanas: false, puertas: false, objetos: false, freno: false
+    });
+    let audioContext = null;
+    let alarmTimer = null;
+
+    function loadJSON(key, fallback) {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch (error) {
+        console.warn("No se pudieron leer los datos guardados:", error);
+        return fallback;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEYS.armed, String(isArmed));
+      localStorage.setItem(STORAGE_KEYS.checklist, JSON.stringify(checklistState));
+      localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+    }
+
+    // Registra cada evento con fecha y hora local del navegador.
+    function logEvent(title, danger = false) {
+      events.unshift({
+        title,
+        danger,
+        timestamp: new Date().toISOString()
+      });
+      // Limita el historial para no guardar una cantidad indefinida de registros.
+      events = events.slice(0, 100);
+      saveState();
+      renderEvents();
+    }
+
+    function formatDate(isoDate) {
+      const date = new Date(isoDate);
+      return date.toLocaleString("es-EC", {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+    }
+
+    function renderEvents() {
+      eventsList.replaceChildren();
+      emptyEvents.style.display = events.length ? "none" : "block";
+
+      events.forEach((event) => {
+        const item = document.createElement("li");
+        item.className = "event";
+
+        const dot = document.createElement("span");
+        dot.className = "event-dot" + (event.danger ? " danger" : "");
+
+        const content = document.createElement("div");
+        content.className = "event-main";
+
+        const title = document.createElement("div");
+        title.className = "event-title";
+        title.textContent = event.title; // textContent evita interpretar el texto como HTML.
+
+        const time = document.createElement("div");
+        time.className = "event-time";
+        time.textContent = formatDate(event.timestamp);
+
+        content.append(title, time);
+        item.append(dot, content);
+        eventsList.append(item);
+      });
+    }
+
+    function updateStatus() {
+      statusValue.className = "status-value " + (alarmActive ? "alarm" : isArmed ? "armed" : "disarmed");
+      statusValue.textContent = alarmActive ? "ALARMA ACTIVADA" : isArmed ? "ARMADO" : "DESARMADO";
+      statusIcon.textContent = alarmActive ? "🚨" : isArmed ? "🔒" : "🔓";
+      toggleBtn.textContent = isArmed ? "Desarmar sistema" : "Armar sistema";
+      toggleBtn.className = "btn " + (isArmed ? "btn-red" : "btn-green");
+
+      // Los sensores se pueden pulsar para simular eventos; solo disparan alarma al estar armado.
+      document.querySelectorAll(".sensor").forEach((button) => {
+        button.disabled = false;
+      });
+    }
+
+    function showMessage(text, isError = false) {
+      message.textContent = text;
+      message.style.color = isError ? "var(--red)" : "var(--yellow)";
+    }
+
+    // Valida que el usuario haya escrito exactamente cuatro dígitos.
+    function getValidPin() {
+      const pin = pinInput.value.trim();
+      if (!/^\d{4}$/.test(pin)) {
+        showMessage("Introduce un PIN de exactamente 4 dígitos.", true);
+        return null;
+      }
+      if (pin !== DEFAULT_PIN) {
+        showMessage("PIN incorrecto. Inténtalo de nuevo.", true);
+        logEvent("Intento de acceso con PIN incorrecto", true);
+        return null;
+      }
+      return pin;
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      if (!getValidPin()) return;
+      pinInput.value = "";
+      if (isArmed) {
+        isArmed = false;
+        stopAlarm();
+        logEvent("Sistema desarmado mediante PIN");
+        showMessage("Sistema desarmado correctamente.");
+      } else {
+        isArmed = true;
+        logEvent("Sistema armado");
+        showMessage("Sistema armado. Los sensores están en vigilancia simulada.");
+      }
+      saveState();
+      updateStatus();
+    });
+
+    pinInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") toggleBtn.click();
+    });
+
+    // ===== Simulación de sensores y alarma =====
+    document.querySelectorAll(".sensor").forEach((button) => {
+      button.addEventListener("click", () => {
+        const sensorName = button.dataset.sensor;
+        if (isArmed) {
+          logEvent("ALERTA: " + sensorName, true);
+          triggerAlarm(sensorName);
+        } else {
+          logEvent("Sensor simulado con sistema desarmado: " + sensorName);
+          showMessage("Evento registrado; el sistema está desarmado.");
+        }
+      });
+    });
+
+    // Crea un tono de alarma con Web Audio API; puede requerir interacción del usuario.
+    function playAlarmTone() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass || alarmSilenced) return;
+        if (!audioContext) audioContext = new AudioContextClass();
+        if (audioContext.state === "suspended") audioContext.resume();
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.type = "sawtooth";
+        oscillator.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.12, audioContext.currentTime + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.28);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } catch (error) {
+        console.warn("El navegador no permitió reproducir el sonido:", error);
+      }
+    }
+
+    function triggerAlarm(sensorName) {
+      alarmActive = true;
+      alarmSilenced = false;
+      alertText.textContent = "Evento detectado: " + sensorName;
+      alertBanner.classList.add("show", "flashing");
+      updateStatus();
+      showMessage("Actividad sospechosa detectada. Alarma activa.", true);
+
+      // Repite el tono hasta que el usuario silencie o desarme el sistema.
+      if (alarmTimer) clearInterval(alarmTimer);
+      playAlarmTone();
+      alarmTimer = setInterval(playAlarmTone, 650);
+    }
+
+    function stopAlarm() {
+      alarmActive = false;
+      alarmSilenced = false;
+      alertBanner.classList.remove("show", "flashing");
+      if (alarmTimer) {
+        clearInterval(alarmTimer);
+        alarmTimer = null;
+      }
+      updateStatus();
+    }
+
+    $("#silenceBtn").addEventListener("click", () => {
+      alarmSilenced = true;
+      if (alarmTimer) {
+        clearInterval(alarmTimer);
+        alarmTimer = null;
+      }
+      alertBanner.classList.remove("flashing");
+      showMessage("Sonido silenciado. La alerta visual sigue activa.");
+      logEvent("Sonido de alarma silenciado");
+    });
+
+    // ===== Checklist y barra de progreso =====
+    const checklistInputs = document.querySelectorAll("[data-check]");
+
+    function renderChecklist() {
+      let completed = 0;
+      checklistInputs.forEach((input) => {
+        input.checked = Boolean(checklistState[input.dataset.check]);
+        if (input.checked) completed++;
+      });
+      const percent = Math.round((completed / checklistInputs.length) * 100);
+      $("#progressLabel").textContent = `${completed} de ${checklistInputs.length} (${percent}%)`;
+      $("#progressBar").style.width = percent + "%";
+      $("#progressTrack").setAttribute("aria-valuenow", String(percent));
+    }
+
+    checklistInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        checklistState[input.dataset.check] = input.checked;
+        saveState();
+        renderChecklist();
+      });
+    });
+
+    // Pide confirmación antes de eliminar permanentemente el historial local.
+    $("#clearBtn").addEventListener("click", () => {
+      if (!confirm("¿Seguro que deseas borrar todo el historial de eventos?")) return;
+      events = [];
+      saveState();
+      renderEvents();
+      showMessage("Historial borrado.");
+    });
+
+    // ===== Inicio =====
+    renderEvents();
+    renderChecklist();
+    updateStatus();
+    if (isArmed) showMessage("Estado recuperado: sistema armado.");
+  </script>
+</body>
+</html>
